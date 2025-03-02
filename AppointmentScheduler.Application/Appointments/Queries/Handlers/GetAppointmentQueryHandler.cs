@@ -37,12 +37,12 @@ namespace AppointmentScheduler.Application.Appointments.Queries.Handlers
             if(appointment == null)
             {
                 response.isSuccess = false;
-                response.Message = "Appoint does not exist";
+                response.Message = "Appointment does not exist";
                 response.ResponseCode = "06";
                 return response;
             }
             response.isSuccess = true;
-            response.Message = $"Appointment with ID {request.AppointmentId} not found";
+            response.Message = $"Appointment with ID {appointment.Id} found";
             response.ResponseCode = "00";
             response.Data = appointment;
             return response;

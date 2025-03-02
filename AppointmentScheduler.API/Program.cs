@@ -12,6 +12,8 @@ using AppointmentScheduler.Application.Appointments.Queries.Handlers;
 using AppointmentScheduler.Application.Appointments.Commands;
 using AppointmentScheduler.Application.Appointments.Queries;
 using AppointmentScheduler.Application.Appointments.Commands.CommandValidators;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,8 +21,26 @@ var builder = WebApplication.CreateBuilder(args);
 ConfigureLogging(builder);
 ConfigureServices(builder.Services, builder.Configuration);
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("fixed", opt =>
+    {
+        opt.PermitLimit = 100;
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.QueueLimit = 2;
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+    });
+});
+
 var app = builder.Build();
 ConfigurePipeline(app, app.Environment);
+
+//rate limiting
+app.UseRateLimiter();
+
+//rate limie specific endpoint
+app.MapGet("/api/data", () => "Rate-limited endpoint")
+   .RequireRateLimiting("fixed");
 
 app.Run();
 
